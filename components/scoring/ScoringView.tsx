@@ -160,10 +160,39 @@ export default function ScoringView({ strategy }: ScoringViewProps) {
                         </span>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                        <div className="h-14 w-28 bg-zinc-900 rounded-2xl flex items-center justify-center border border-zinc-800 relative overflow-hidden">
-                            <div className="absolute inset-0 bg-white" style={{ width: `${Math.min(100, Math.max(0, score))}%`, opacity: 0.1 }}></div>
-                            <span className="relative z-10 font-mono text-2xl font-bold text-white tracking-widest">{score}</span>
+                    <div className="h-16 px-4 bg-zinc-900/80 backdrop-blur-sm rounded-full flex items-center gap-4 border border-zinc-800 shadow-xl">
+                        {/* Donut Chart */}
+                        <div className="relative w-10 h-10">
+                            <svg className="w-full h-full -rotate-90 transform" viewBox="0 0 36 36">
+                                {/* Track */}
+                                <path
+                                    className="text-zinc-800"
+                                    d="M18 2.0845
+                                            a 15.9155 15.9155 0 0 1 0 31.831
+                                            a 15.9155 15.9155 0 0 1 0 -31.831"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="4"
+                                />
+                                {/* Progress */}
+                                <path
+                                    className="text-white drop-shadow-[0_0_2px_rgba(255,255,255,0.5)]"
+                                    strokeDasharray={`${Math.max(0, Math.min(100, score))}, 100`}
+                                    d="M18 2.0845
+                                            a 15.9155 15.9155 0 0 1 0 31.831
+                                            a 15.9155 15.9155 0 0 1 0 -31.831"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="4"
+                                    strokeLinecap="round"
+                                />
+                            </svg>
+                        </div>
+
+                        {/* Text Info */}
+                        <div className="flex flex-col justify-center pr-2">
+                            <span className="text-xl font-bold text-white leading-none tabular-nums">{score}%</span>
+                            <span className="text-[10px] text-zinc-500 font-medium uppercase tracking-wider mt-0.5">Score</span>
                         </div>
                     </div>
                 </div>
