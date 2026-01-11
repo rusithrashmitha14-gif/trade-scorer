@@ -285,7 +285,10 @@ export default function StrategyForm({ initialData }: StrategyFormProps) {
                                                         type="number"
                                                         value={item.points}
                                                         onChange={e => updateItem(sIndex, iIndex, { points: parseInt(e.target.value) || 0 })}
-                                                        className="w-16 h-8 text-right font-mono text-sm bg-zinc-900 text-white border border-zinc-700 rounded px-2 focus:border-white transition-colors placeholder:text-zinc-600"
+                                                        className={cn(
+                                                            "w-16 h-8 text-right font-mono text-sm bg-zinc-900 border border-zinc-700 rounded px-2 focus:border-white transition-colors placeholder:text-zinc-600",
+                                                            item.points < 0 ? "text-red-400 border-red-900/50" : "text-white"
+                                                        )}
                                                         placeholder="Pts"
                                                     />
                                                 )}
@@ -308,7 +311,11 @@ export default function StrategyForm({ initialData }: StrategyFormProps) {
                                                                 type="number"
                                                                 value={opt.points}
                                                                 onChange={e => updateOption(sIndex, iIndex, oIndex, { points: parseInt(e.target.value) || 0 })}
-                                                                className="w-14 h-6 text-right font-mono text-xs bg-zinc-900 border-b border-zinc-700 rounded-none px-0 text-white focus:border-white"
+                                                                className={cn(
+                                                                    "w-14 h-8 text-right font-mono text-xs bg-zinc-900 border border-zinc-800 rounded px-1 focus:border-white transition-colors placeholder:text-zinc-700",
+                                                                    opt.points < 0 ? "text-red-400 border-red-900/50" : "text-zinc-300"
+                                                                )}
+                                                                placeholder="Pts"
                                                             />
                                                             <button onClick={() => removeOption(sIndex, iIndex, oIndex)} className="text-zinc-500 hover:text-red-500 opacity-0 group-hover/option:opacity-100 transition-opacity">
                                                                 <Trash2 className="w-3 h-3" />

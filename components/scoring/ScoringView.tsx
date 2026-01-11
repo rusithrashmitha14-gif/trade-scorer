@@ -193,7 +193,7 @@ export default function ScoringView({ strategy }: ScoringViewProps) {
 
                         {/* Text Info */}
                         <div className="flex flex-col justify-center pr-2">
-                            <span className="text-xl font-bold text-white leading-none tabular-nums">{score}%</span>
+                            <span className="text-xl font-bold text-white leading-none tabular-nums">{Math.max(0, score)}%</span>
                             <span className="text-[10px] text-zinc-500 font-medium uppercase tracking-wider mt-0.5">Score</span>
                         </div>
                     </div>

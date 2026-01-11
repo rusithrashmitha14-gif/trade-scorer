@@ -49,17 +49,18 @@ export interface Strategy {
 }
 
 // Helper to calculate total max score (must be 100)
+// This only counts POSITIVE points towards the 100% baseline.
+// Negative points are treated as penalties during live scoring.
 export const calculateMaxScore = (sections: StrategySection[]): number => {
     return sections.reduce((total, section) => {
         return total + section.items.reduce((secTotal, item) => {
             if (item.type === 'checkbox') {
-                // Checkboxes add to max score if points > 0
+                // Sum only if points > 0
                 return secTotal + (item.points > 0 ? item.points : 0);
-                // Wait, "positive or negative". Usually max score implies the perfect setup.
-                // So we assume perfect setup = all positive checkboxes checked + max option of radios.
-            } else if (item.type === 'radio') {
-                const maxOption = item.options?.reduce((max, opt) => Math.max(max, opt.points), 0) || 0;
-                return secTotal + maxOption;
+            } else if (item.type === 'radio' && item.options) {
+                // Take the maximum POSITIVE option score
+                const maxOption = item.options.reduce((max, opt) => Math.max(max, opt.points), 0);
+                return secTotal + (maxOption > 0 ? maxOption : 0);
             }
             return secTotal;
         }, 0);
