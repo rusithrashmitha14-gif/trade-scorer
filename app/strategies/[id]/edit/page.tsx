@@ -4,18 +4,44 @@ import { useParams } from 'next/navigation';
 import StrategyForm from '@/components/strategies/StrategyForm';
 import { useEffect, useState } from 'react';
 import { Strategy } from '@/types';
+import { supabase } from '@/utils/supabase/client';
 
 export default function EditStrategyPage() {
     const params = useParams();
     const [strategy, setStrategy] = useState<Strategy | null>(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Fetch logic here
-        // const { id } = params;
-        // setStrategy(...)
-    }, [params]);
+        const fetchStrategy = async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('strategies')
+                    .select(`
+                        *,
+                        sections:strategy_sections(
+                            *,
+                            items:strategy_items(*)
+                        )
+                    `)
+                    .eq('id', params.id)
+                    .single();
 
-    if (!strategy) return <div>Loading...</div>;
+                if (error) throw error;
+                setStrategy(data);
+            } catch (error) {
+                console.error('Error fetching strategy:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (params.id) {
+            fetchStrategy();
+        }
+    }, [params.id]);
+
+    if (loading) return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+    if (!strategy) return <div className="flex items-center justify-center min-h-screen">Strategy not found</div>;
 
     return (
         <div>

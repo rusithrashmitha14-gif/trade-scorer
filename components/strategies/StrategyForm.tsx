@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Strategy, StrategySection, StrategyItem, calculateMaxScore } from '@/types';
 import { cn } from '@/lib/utils';
-// import { supabase } from '@/utils/supabase/client';
+import { supabase } from '@/utils/supabase/client';
 
 interface StrategyFormProps {
     initialData?: Strategy;
@@ -120,11 +120,87 @@ export default function StrategyForm({ initialData }: StrategyFormProps) {
     const handleSave = async () => {
         if (!isValid) return;
         setLoading(true);
-        // Supabase Save Logic Here
-        console.log('Saving strategy:', strategy);
-        // await new Promise(r => setTimeout(r, 1000));
-        router.push('/');
-        setLoading(false);
+
+        try {
+            const isUpdate = strategy.id && strategy.id.length > 0;
+
+            // Prepare strategy data
+            const strategyData = {
+                name: strategy.name,
+                description: strategy.description,
+                grade_thresholds: strategy.grade_thresholds,
+                grade_messages: strategy.grade_messages
+            };
+
+            let strategyId = strategy.id;
+
+            if (isUpdate) {
+                // Update existing strategy
+                const { error } = await supabase
+                    .from('strategies')
+                    .update(strategyData)
+                    .eq('id', strategyId);
+
+                if (error) throw error;
+
+                // Delete existing sections and items (cascade will handle items)
+                await supabase
+                    .from('strategy_sections')
+                    .delete()
+                    .eq('strategy_id', strategyId);
+            } else {
+                // Insert new strategy
+                const { data, error } = await supabase
+                    .from('strategies')
+                    .insert(strategyData)
+                    .select()
+                    .single();
+
+                if (error) throw error;
+                strategyId = data.id;
+            }
+
+            // Insert sections and items
+            for (const section of strategy.sections) {
+                const { data: sectionData, error: sectionError } = await supabase
+                    .from('strategy_sections')
+                    .insert({
+                        strategy_id: strategyId,
+                        title: section.title,
+                        order: section.order
+                    })
+                    .select()
+                    .single();
+
+                if (sectionError) throw sectionError;
+
+                // Insert items for this section
+                if (section.items && section.items.length > 0) {
+                    const itemsToInsert = section.items.map(item => ({
+                        section_id: sectionData.id,
+                        type: item.type,
+                        label: item.label,
+                        points: item.points,
+                        options: item.options || null,
+                        order: item.order
+                    }));
+
+                    const { error: itemsError } = await supabase
+                        .from('strategy_items')
+                        .insert(itemsToInsert);
+
+                    if (itemsError) throw itemsError;
+                }
+            }
+
+            // Success! Navigate to home
+            router.push('/');
+        } catch (error) {
+            console.error('Error saving strategy:', error);
+            alert('Failed to save strategy. Please try again.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (

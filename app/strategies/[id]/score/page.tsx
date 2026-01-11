@@ -4,47 +4,44 @@ import { useParams } from 'next/navigation';
 import ScoringView from '@/components/scoring/ScoringView';
 import { useEffect, useState } from 'react';
 import { Strategy } from '@/types';
-
-// MOCK for display until DB is ready
-const MOCK_STRATEGY: Strategy = {
-    id: '1',
-    name: 'ICT Silver Bullet',
-    description: '10am - 11am NY Time',
-    grade_thresholds: { "A+": 90, "A": 80, "B": 70, "C": 60 },
-    grade_messages: { "A+": "Full Size", "A": "Half Size", "B": "Quarter Size", "C": "Sit on hands", "NO TRADE": "NO" },
-    sections: [
-        {
-            id: 's1',
-            title: 'Bias & Time',
-            order: 0,
-            items: [
-                { id: 'i1', section_id: 's1', type: 'checkbox', label: 'In Killzone (10-11)', points: 10, order: 0 },
-                { id: 'i2', section_id: 's1', type: 'checkbox', label: 'HTF PD Array Supp/Res', points: 15, order: 1 },
-            ]
-        },
-        {
-            id: 's2',
-            title: 'Entry Model',
-            order: 1,
-            items: [
-                { id: 'i3', section_id: 's2', type: 'checkbox', label: 'Liquidity Sweep', points: 20, order: 0 },
-                { id: 'i4', section_id: 's2', type: 'checkbox', label: 'MSS (Market Structure Shift)', points: 20, order: 1 },
-                { id: 'i5', section_id: 's2', type: 'checkbox', label: 'FVG Entry', points: 20, order: 2 },
-                { id: 'i6', section_id: 's2', type: 'checkbox', label: 'Risk Reward > 2R', points: 15, order: 3 },
-            ]
-        }
-    ]
-};
+import { supabase } from '@/utils/supabase/client';
 
 export default function ScorePage() {
     const params = useParams();
-    const [strategy, setStrategy] = useState<Strategy | null>(MOCK_STRATEGY);
+    const [strategy, setStrategy] = useState<Strategy | null>(null);
+    const [loading, setLoading] = useState(true);
 
-    // useEffect(() => {
-    //     // Fetch logic here
-    // }, [params]);
+    useEffect(() => {
+        const fetchStrategy = async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('strategies')
+                    .select(`
+                        *,
+                        sections:strategy_sections(
+                            *,
+                            items:strategy_items(*)
+                        )
+                    `)
+                    .eq('id', params.id)
+                    .single();
 
-    if (!strategy) return <div>Loading...</div>;
+                if (error) throw error;
+                setStrategy(data);
+            } catch (error) {
+                console.error('Error fetching strategy:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (params.id) {
+            fetchStrategy();
+        }
+    }, [params.id]);
+
+    if (loading) return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+    if (!strategy) return <div className="flex items-center justify-center min-h-screen">Strategy not found</div>;
 
     return <ScoringView strategy={strategy} />;
 }

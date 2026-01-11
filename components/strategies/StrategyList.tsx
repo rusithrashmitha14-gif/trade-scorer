@@ -1,28 +1,45 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Plus, Pencil, Trash2, TrendingUp } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Strategy } from '@/types';
-// import { supabase } from '@/utils/supabase/client';
-
-const MOCK_STRATEGIES: Strategy[] = [
-    {
-        id: '1',
-        name: 'ICT Silver Bullet',
-        description: 'Time based liquidity sweep setup',
-        grade_thresholds: { "A+": 90, "A": 80, "B": 70, "C": 60 },
-        grade_messages: { "A+": "Send it", "A": "Good", "B": "Ok", "C": "Risky", "NO TRADE": "Stop" },
-        sections: []
-    }
-];
+import { supabase } from '@/utils/supabase/client';
 
 export default function StrategyList() {
-    const [strategies, setStrategies] = useState<Strategy[]>(MOCK_STRATEGIES);
+    const [strategies, setStrategies] = useState<Strategy[]>([]);
+    const [loading, setLoading] = useState(true);
     const router = useRouter();
+
+    // Fetch strategies from Supabase on mount
+    useEffect(() => {
+        fetchStrategies();
+    }, []);
+
+    const fetchStrategies = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('strategies')
+                .select(`
+                    *,
+                    sections:strategy_sections(
+                        *,
+                        items:strategy_items(*)
+                    )
+                `)
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+            setStrategies(data || []);
+        } catch (error) {
+            console.error('Error fetching strategies:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleEdit = (e: React.MouseEvent, id: string) => {
         e.preventDefault();
@@ -30,11 +47,24 @@ export default function StrategyList() {
         router.push(`/strategies/${id}/edit`);
     };
 
-    const handleDelete = (e: React.MouseEvent, id: string) => {
+    const handleDelete = async (e: React.MouseEvent, id: string) => {
         e.preventDefault();
         e.stopPropagation();
         if (confirm('Are you sure you want to delete this strategy?')) {
-            setStrategies(prev => prev.filter(s => s.id !== id));
+            try {
+                const { error } = await supabase
+                    .from('strategies')
+                    .delete()
+                    .eq('id', id);
+
+                if (error) throw error;
+
+                // Refresh the list
+                fetchStrategies();
+            } catch (error) {
+                console.error('Error deleting strategy:', error);
+                alert('Failed to delete strategy');
+            }
         }
     };
 
