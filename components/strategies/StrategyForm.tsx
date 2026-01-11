@@ -69,7 +69,7 @@ export default function StrategyForm({ initialData }: StrategyFormProps) {
         const newItem: StrategyItem = {
             id: crypto.randomUUID(),
             type,
-            label: type === 'radio' ? 'New Radio Group' : 'New Checkbox',
+            label: type === 'radio' ? 'New Multi-Option' : 'New Checkbox',
             points: 10,
             options: type === 'radio' ? [{ label: 'Option 1', points: 10 }, { label: 'Option 2', points: 0 }] : undefined,
             order: newSections[sectionIndex].items.length
@@ -219,8 +219,10 @@ export default function StrategyForm({ initialData }: StrategyFormProps) {
                                             {item.type === 'radio' && item.options && (
                                                 <div className="pl-4 space-y-2 border-l border-zinc-800">
                                                     {item.options.map((opt, oIndex) => (
-                                                        <div key={oIndex} className="flex gap-2 items-center">
-                                                            <div className="w-3 h-3 rounded-full border-2 border-zinc-600"></div>
+                                                        <div key={oIndex} className="flex gap-2 items-center relative group/option">
+                                                            <div className="flex items-center justify-center w-4 h-4 shrink-0">
+                                                                <div className="w-2 h-2 rounded-full bg-zinc-600"></div>
+                                                            </div>
                                                             <Input
                                                                 value={opt.label}
                                                                 onChange={e => updateOption(sIndex, iIndex, oIndex, { label: e.target.value })}
@@ -232,7 +234,7 @@ export default function StrategyForm({ initialData }: StrategyFormProps) {
                                                                 onChange={e => updateOption(sIndex, iIndex, oIndex, { points: parseInt(e.target.value) || 0 })}
                                                                 className="w-14 h-6 text-right font-mono text-xs bg-zinc-900 border-b border-zinc-700 rounded-none px-0 text-white focus:border-white"
                                                             />
-                                                            <button onClick={() => removeOption(sIndex, iIndex, oIndex)} className="text-zinc-500 hover:text-red-500">
+                                                            <button onClick={() => removeOption(sIndex, iIndex, oIndex)} className="text-zinc-500 hover:text-red-500 opacity-0 group-hover/option:opacity-100 transition-opacity">
                                                                 <Trash2 className="w-3 h-3" />
                                                             </button>
                                                         </div>
@@ -256,7 +258,7 @@ export default function StrategyForm({ initialData }: StrategyFormProps) {
                                     + Checkbox
                                 </Button>
                                 <Button onClick={() => addItem(sIndex, 'radio')} className="text-xs h-8 bg-zinc-800 text-white hover:bg-zinc-700 border-none">
-                                    + Radio Group
+                                    + Multi-Option
                                 </Button>
                             </div>
                         </div>
