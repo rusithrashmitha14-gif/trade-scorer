@@ -66,14 +66,17 @@ export default function ScoringView({ strategy }: ScoringViewProps) {
     return (
         <div className="pb-32 font-sans bg-white min-h-screen text-black">
             {/* Header */}
-            <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-md -mx-4 px-6 pt-12 pb-4 mb-8">
-                <div className="flex items-center justify-between mb-2">
+            {/* Header */}
+            <div className="pt-8 pb-6 mb-4">
+                <div className="flex items-center justify-between mb-4">
                     <Link href="/">
                         <Button variant="ghost" size="sm" className="w-10 h-10 rounded-full bg-white border border-zinc-200 shadow-sm hover:shadow-md hover:bg-zinc-50 flex items-center justify-center p-0 transition-all">
                             <ArrowLeft className="w-5 h-5 text-black" />
                         </Button>
                     </Link>
-                    <h1 className="font-bold text-xl tracking-wide text-black">{strategy.name}</h1>
+                    <div className="flex-1 text-center px-4">
+                        <h1 className="font-bold text-3xl tracking-tight text-black">{strategy.name}</h1>
+                    </div>
                     <Button variant="ghost" size="sm" className="w-10 h-10 rounded-full bg-white border border-zinc-200 shadow-sm hover:shadow-md hover:bg-zinc-50 flex items-center justify-center p-0 transition-all text-black hover:text-black" onClick={() => setSelections({})}>
                         <RotateCcw className="w-5 h-5" />
                     </Button>
@@ -84,7 +87,7 @@ export default function ScoringView({ strategy }: ScoringViewProps) {
             <div className="space-y-12 px-2">
                 {strategy.sections.map(section => (
                     <div key={section.id} className="space-y-6">
-                        <h3 className="text-2xl font-bold text-black tracking-tight flex items-center gap-4">
+                        <h3 className="text-3xl font-bold text-black tracking-tight flex items-center gap-4">
                             {section.title}
                             <div className="h-px bg-zinc-200 flex-1"></div>
                         </h3>
