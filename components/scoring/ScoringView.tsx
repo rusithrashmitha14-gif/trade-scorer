@@ -66,8 +66,7 @@ export default function ScoringView({ strategy }: ScoringViewProps) {
     return (
         <div className="pb-32 font-sans bg-white min-h-screen text-black">
             {/* Header */}
-            {/* Header */}
-            <div className="pt-8 pb-6 mb-4">
+            <div className="pt-8 pb-6 mb-4 px-6">
                 <div className="flex items-center justify-between mb-4">
                     <Link href="/">
                         <Button variant="ghost" size="sm" className="w-10 h-10 rounded-full bg-white border border-zinc-200 shadow-sm hover:shadow-md hover:bg-zinc-50 flex items-center justify-center p-0 transition-all">
