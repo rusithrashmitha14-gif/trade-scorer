@@ -193,7 +193,7 @@ export default function StrategyForm({ initialData }: StrategyFormProps) {
                         {/* Items */}
                         <div className="space-y-3">
                             {section.items.map((item, iIndex) => (
-                                <div key={item.id} className="bg-zinc-100 dark:bg-zinc-900/50 p-4 rounded-xl border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700 transition-all">
+                                <div key={item.id} className="bg-black text-white p-4 rounded-xl border border-zinc-800 hover:border-zinc-600 transition-all shadow-sm">
                                     <div className="flex justify-between items-start gap-4">
                                         <div className="flex-1 space-y-3">
                                             {/* Item Label & Points */}
@@ -201,7 +201,7 @@ export default function StrategyForm({ initialData }: StrategyFormProps) {
                                                 <Input
                                                     value={item.label}
                                                     onChange={e => updateItem(sIndex, iIndex, { label: e.target.value })}
-                                                    className="bg-transparent border-none p-0 h-auto font-medium focus:ring-0 text-base"
+                                                    className="bg-transparent border-none p-0 h-auto font-medium focus:ring-0 text-base text-white placeholder:text-zinc-500"
                                                     placeholder={item.type === 'radio' ? "Group Name..." : "Condition..."}
                                                 />
                                                 {item.type === 'checkbox' && (
@@ -209,7 +209,7 @@ export default function StrategyForm({ initialData }: StrategyFormProps) {
                                                         type="number"
                                                         value={item.points}
                                                         onChange={e => updateItem(sIndex, iIndex, { points: parseInt(e.target.value) || 0 })}
-                                                        className="w-16 h-8 text-right font-mono text-sm bg-white dark:bg-black border border-zinc-200 dark:border-zinc-800 rounded px-2"
+                                                        className="w-16 h-8 text-right font-mono text-sm bg-zinc-900 text-white border border-zinc-700 rounded px-2 focus:border-white transition-colors placeholder:text-zinc-600"
                                                         placeholder="Pts"
                                                     />
                                                 )}
@@ -217,20 +217,20 @@ export default function StrategyForm({ initialData }: StrategyFormProps) {
 
                                             {/* Radio Options */}
                                             {item.type === 'radio' && item.options && (
-                                                <div className="pl-4 space-y-2 border-l border-zinc-300 dark:border-zinc-700">
+                                                <div className="pl-4 space-y-2 border-l border-zinc-800">
                                                     {item.options.map((opt, oIndex) => (
                                                         <div key={oIndex} className="flex gap-2 items-center">
-                                                            <div className="w-3 h-3 rounded-full border-2 border-zinc-400"></div>
+                                                            <div className="w-3 h-3 rounded-full border-2 border-zinc-600"></div>
                                                             <Input
                                                                 value={opt.label}
                                                                 onChange={e => updateOption(sIndex, iIndex, oIndex, { label: e.target.value })}
-                                                                className="bg-transparent border-none p-0 h-auto text-sm focus:ring-0 flex-1"
+                                                                className="bg-transparent border-none p-0 h-auto text-sm focus:ring-0 flex-1 text-zinc-300 focus:text-white transition-colors"
                                                             />
                                                             <Input
                                                                 type="number"
                                                                 value={opt.points}
                                                                 onChange={e => updateOption(sIndex, iIndex, oIndex, { points: parseInt(e.target.value) || 0 })}
-                                                                className="w-14 h-6 text-right font-mono text-xs bg-transparent border-b border-zinc-500 rounded-none px-0"
+                                                                className="w-14 h-6 text-right font-mono text-xs bg-zinc-900 border-b border-zinc-700 rounded-none px-0 text-white focus:border-white"
                                                             />
                                                             <button onClick={() => removeOption(sIndex, iIndex, oIndex)} className="text-zinc-500 hover:text-red-500">
                                                                 <Trash2 className="w-3 h-3" />
