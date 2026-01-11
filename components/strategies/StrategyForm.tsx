@@ -154,20 +154,20 @@ export default function StrategyForm({ initialData }: StrategyFormProps) {
             {/* Basic Info */}
             <div className="space-y-6">
                 <div className="space-y-2">
-                    <label className="text-sm font-medium text-zinc-500">Strategy Name</label>
+                    <label className="text-sm font-medium text-black dark:text-zinc-400">Strategy Name</label>
                     <Input
                         value={strategy.name}
                         onChange={e => setStrategy({ ...strategy, name: e.target.value })}
-                        className="bg-transparent border-t-0 border-x-0 border-b-2 border-zinc-200 dark:border-zinc-800 rounded-none px-0 text-xl font-bold focus:ring-0 focus:border-black dark:focus:border-white transition-all placeholder:text-zinc-700"
+                        className="bg-transparent border-t-0 border-x-0 border-b-2 border-zinc-200 dark:border-zinc-800 rounded-none px-0 text-xl font-bold focus:ring-0 focus:border-black dark:focus:border-white transition-all placeholder:text-zinc-500 text-black dark:text-white"
                         placeholder="e.g. ICT Silver Bullet"
                     />
                 </div>
                 <div className="space-y-2">
-                    <label className="text-sm font-medium text-zinc-500">Description</label>
+                    <label className="text-sm font-medium text-black dark:text-zinc-400">Description</label>
                     <Input
                         value={strategy.description}
                         onChange={e => setStrategy({ ...strategy, description: e.target.value })}
-                        className="bg-transparent border-t-0 border-x-0 border-b-2 border-zinc-200 dark:border-zinc-800 rounded-none px-0 text-base focus:ring-0 focus:border-black dark:focus:border-white transition-all"
+                        className="bg-transparent border-t-0 border-x-0 border-b-2 border-zinc-200 dark:border-zinc-800 rounded-none px-0 text-base focus:ring-0 focus:border-black dark:focus:border-white transition-all text-black dark:text-white"
                         placeholder="Optional description..."
                     />
                 </div>
@@ -183,7 +183,7 @@ export default function StrategyForm({ initialData }: StrategyFormProps) {
                             <Input
                                 value={section.title}
                                 onChange={e => updateSection(sIndex, { title: e.target.value })}
-                                className="font-bold text-lg bg-transparent border-none p-0 focus:ring-0 w-auto"
+                                className="font-bold text-lg bg-transparent border-none p-0 focus:ring-0 w-auto text-black placeholder:text-zinc-500"
                             />
                             <button onClick={() => deleteSection(sIndex)} className="opacity-0 group-hover:opacity-100 transition-opacity text-zinc-400 hover:text-red-500">
                                 <Trash2 className="w-4 h-4" />
@@ -263,18 +263,22 @@ export default function StrategyForm({ initialData }: StrategyFormProps) {
                     </div>
                 ))}
 
-                <Button variant="outline" className="w-full border-dashed border-zinc-300 dark:border-zinc-700 h-12 hover:bg-zinc-100 dark:hover:bg-zinc-900" onClick={addSection}>
-                    + Add New Section
+                <Button variant="ghost" className="w-full h-14 bg-black text-white hover:bg-zinc-800 hover:text-white rounded-xl shadow-lg hover:shadow-xl transition-all font-medium tracking-wide flex items-center justify-center gap-2 border border-zinc-800" onClick={addSection}>
+                    <Plus className="w-5 h-5" />
+                    Add New Section
                 </Button>
             </div>
 
             {/* Minimal Grade Config */}
             <div className="border-t border-zinc-200 dark:border-zinc-800 pt-8">
-                <h3 className="font-bold mb-4">Grade Thresholds</h3>
+                <h3 className="font-bold mb-4 text-black dark:text-white">Grade Thresholds</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     {Object.entries(strategy.grade_thresholds).map(([grade, val]) => (
-                        <div key={grade} className="bg-zinc-100 dark:bg-zinc-900/50 p-4 rounded-xl text-center">
-                            <div className="text-xs text-zinc-500 font-bold mb-1">{grade}</div>
+                        <div key={grade} className="bg-black text-white p-6 rounded-2xl text-center border border-zinc-800 hover:border-zinc-600 w-full transition-all group relative overflow-hidden">
+                            <div className="absolute top-0 right-0 p-2 opacity-50">
+                                <div className="w-16 h-16 bg-white/5 rounded-full -mr-8 -mt-8 blur-xl"></div>
+                            </div>
+                            <div className="text-xs text-zinc-500 uppercase tracking-widest font-bold mb-2 group-hover:text-zinc-300 transition-colors">{grade}</div>
                             <Input
                                 type="number"
                                 value={val}
@@ -285,7 +289,7 @@ export default function StrategyForm({ initialData }: StrategyFormProps) {
                                         [grade]: parseInt(e.target.value)
                                     }
                                 })}
-                                className="text-center font-mono bg-transparent border-none text-xl p-0 focus:ring-0 w-full"
+                                className="text-center font-mono bg-transparent border-none text-3xl p-0 focus:ring-0 w-full text-white font-black tracking-tighter placeholder:text-zinc-700"
                             />
                         </div>
                     ))}
