@@ -69,9 +69,9 @@ export default function StrategyForm({ initialData }: StrategyFormProps) {
         const newItem: StrategyItem = {
             id: crypto.randomUUID(),
             type,
-            label: 'New Item',
+            label: type === 'radio' ? 'New Radio Group' : 'New Checkbox',
             points: 10,
-            options: type === 'radio' ? [{ label: 'Option 1', points: 10 }] : undefined,
+            options: type === 'radio' ? [{ label: 'Option 1', points: 10 }, { label: 'Option 2', points: 0 }] : undefined,
             order: newSections[sectionIndex].items.length
         };
         newSections[sectionIndex].items.push(newItem);
@@ -81,6 +81,33 @@ export default function StrategyForm({ initialData }: StrategyFormProps) {
     const updateItem = (sectionIndex: number, itemIndex: number, updates: Partial<StrategyItem>) => {
         const newSections = [...strategy.sections];
         newSections[sectionIndex].items[itemIndex] = { ...newSections[sectionIndex].items[itemIndex], ...updates };
+        setStrategy({ ...strategy, sections: newSections });
+    };
+
+    const updateOption = (sectionIndex: number, itemIndex: number, optionIndex: number, updates: Partial<{ label: string, points: number }>) => {
+        const newSections = [...strategy.sections];
+        const item = newSections[sectionIndex].items[itemIndex];
+        if (item.options) {
+            item.options[optionIndex] = { ...item.options[optionIndex], ...updates };
+        }
+        setStrategy({ ...strategy, sections: newSections });
+    };
+
+    const addOption = (sectionIndex: number, itemIndex: number) => {
+        const newSections = [...strategy.sections];
+        const item = newSections[sectionIndex].items[itemIndex];
+        if (item.options) {
+            item.options.push({ label: 'New Option', points: 0 });
+        }
+        setStrategy({ ...strategy, sections: newSections });
+    };
+
+    const removeOption = (sectionIndex: number, itemIndex: number, optionIndex: number) => {
+        const newSections = [...strategy.sections];
+        const item = newSections[sectionIndex].items[itemIndex];
+        if (item.options && item.options.length > 1) { // Prevent deleting last option
+            item.options = item.options.filter((_, i) => i !== optionIndex);
+        }
         setStrategy({ ...strategy, sections: newSections });
     };
 
@@ -96,130 +123,174 @@ export default function StrategyForm({ initialData }: StrategyFormProps) {
         // Supabase Save Logic Here
         console.log('Saving strategy:', strategy);
         // await new Promise(r => setTimeout(r, 1000));
-        // router.push('/');
+        router.push('/');
         setLoading(false);
     };
 
     return (
-        <div className="space-y-8 pb-20">
-            {/* Header */}
-            <div className="flex flex-col gap-4 sticky top-0 z-10 bg-zinc-950/80 backdrop-blur-md py-4 border-b border-zinc-800">
-                <div className="flex justify-between items-center">
-                    <h2 className="text-xl font-bold">Strategy Editor</h2>
-                    <Button onClick={handleSave} disabled={!isValid || loading} variant={isValid ? 'primary' : 'secondary'}>
-                        {loading ? 'Saving...' : 'Save'}
-                    </Button>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                    <div className={cn("font-mono", currentScore === 100 ? "text-green-400" : "text-yellow-400")}>
+        <div className="space-y-8 pb-32">
+            {/* Sticky Header */}
+            <div className="sticky top-0 z-30 bg-white/50 dark:bg-black/50 backdrop-blur-xl border-b border-zinc-200 dark:border-zinc-800 -mx-4 px-6 py-4 flex justify-between items-center transition-all">
+                <div>
+                    <h2 className="text-xl font-bold dark:text-white text-black">Strategy Editor</h2>
+                    <div className={cn("text-sm font-mono mt-1", currentScore === 100 ? "text-green-500" : "text-yellow-500")}>
                         Total Points: {currentScore}/100
                     </div>
                 </div>
-                {!isValid && currentScore !== 100 && (
-                    <div className="text-xs text-yellow-500 flex items-center gap-2">
-                        <AlertTriangle className="w-3 h-3" />
-                        Target 100 points
-                    </div>
-                )}
-            </div>
-
-            {/* Basic Info */}
-            <div className="space-y-4">
-                <Input
-                    label="Strategy Name"
-                    value={strategy.name}
-                    onChange={e => setStrategy({ ...strategy, name: e.target.value })}
-                />
-                <Input
-                    label="Description (Optional)"
-                    value={strategy.description}
-                    onChange={e => setStrategy({ ...strategy, description: e.target.value })}
-                />
-            </div>
-
-            {/* Sections */}
-            <div className="space-y-6">
-                {strategy.sections.map((section, sIndex) => (
-                    <Card key={section.id} className="border-zinc-800/50 bg-zinc-900/30">
-                        <CardHeader className="bg-zinc-900/50 pb-4">
-                            <div className="flex items-center gap-2">
-                                <Input
-                                    value={section.title}
-                                    onChange={e => updateSection(sIndex, { title: e.target.value })}
-                                    className="font-bold border-transparent bg-transparent hover:bg-zinc-800/50 focus:bg-zinc-800"
-                                />
-                                <Button size="sm" variant="ghost" onClick={() => deleteSection(sIndex)}>
-                                    <Trash2 className="w-4 h-4 text-zinc-500 hover:text-red-400" />
-                                </Button>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="space-y-3 pt-4">
-                            {section.items.map((item, iIndex) => (
-                                <div key={item.id} className="flex gap-2 items-start p-2 rounded-lg bg-zinc-900/50 border border-zinc-800/50">
-                                    <div className="flex-1 space-y-2">
-                                        <div className="flex gap-2">
-                                            <Input
-                                                value={item.label}
-                                                onChange={e => updateItem(sIndex, iIndex, { label: e.target.value })}
-                                                placeholder="Condition..."
-                                                className="h-8 text-sm"
-                                            />
-                                            <Input
-                                                type="number"
-                                                value={item.points}
-                                                onChange={e => updateItem(sIndex, iIndex, { points: parseInt(e.target.value) || 0 })}
-                                                className="w-20 h-8 text-right font-mono"
-                                            />
-                                        </div>
-                                    </div>
-                                    <Button size="sm" variant="ghost" onClick={() => deleteItem(sIndex, iIndex)} className="h-8 w-8 p-0">
-                                        <Trash2 className="w-3 h-3" />
-                                    </Button>
-                                </div>
-                            ))}
-
-                            <div className="flex gap-2 pt-2">
-                                <Button size="sm" variant="secondary" onClick={() => addItem(sIndex, 'checkbox')} className="text-xs h-8">
-                                    + Checkbox
-                                </Button>
-                                {/* Radio support can be added later if needed */}
-                            </div>
-                        </CardContent>
-                    </Card>
-                ))}
-
-                <Button variant="outline" className="w-full border-dashed" onClick={addSection}>
-                    Add Section
+                <Button
+                    onClick={handleSave}
+                    disabled={!isValid || loading}
+                    className={cn(
+                        "rounded-full px-6 transition-all",
+                        isValid
+                            ? "bg-black text-white dark:bg-white dark:text-black hover:scale-105"
+                            : "bg-zinc-200 text-zinc-400 dark:bg-zinc-800 dark:text-zinc-600"
+                    )}
+                >
+                    {loading ? 'Saving...' : 'Save'}
                 </Button>
             </div>
 
-            {/* Grade Config - Simplified for MVP */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Grade Configuration</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                        {/* Simple threshold inputs */}
-                        {Object.entries(strategy.grade_thresholds).map(([grade, val]) => (
-                            <div key={grade}>
-                                <label className="text-xs text-zinc-500">Min Score for {grade}</label>
-                                <Input
-                                    type="number"
-                                    value={val}
-                                    onChange={e => setStrategy({
-                                        ...strategy,
-                                        grade_thresholds: {
-                                            ...strategy.grade_thresholds,
-                                            [grade]: parseInt(e.target.value)
-                                        }
-                                    })}
-                                />
+            {/* Basic Info */}
+            <div className="space-y-6">
+                <div className="space-y-2">
+                    <label className="text-sm font-medium text-zinc-500">Strategy Name</label>
+                    <Input
+                        value={strategy.name}
+                        onChange={e => setStrategy({ ...strategy, name: e.target.value })}
+                        className="bg-transparent border-t-0 border-x-0 border-b-2 border-zinc-200 dark:border-zinc-800 rounded-none px-0 text-xl font-bold focus:ring-0 focus:border-black dark:focus:border-white transition-all placeholder:text-zinc-700"
+                        placeholder="e.g. ICT Silver Bullet"
+                    />
+                </div>
+                <div className="space-y-2">
+                    <label className="text-sm font-medium text-zinc-500">Description</label>
+                    <Input
+                        value={strategy.description}
+                        onChange={e => setStrategy({ ...strategy, description: e.target.value })}
+                        className="bg-transparent border-t-0 border-x-0 border-b-2 border-zinc-200 dark:border-zinc-800 rounded-none px-0 text-base focus:ring-0 focus:border-black dark:focus:border-white transition-all"
+                        placeholder="Optional description..."
+                    />
+                </div>
+            </div>
+
+            {/* Sections */}
+            <div className="space-y-8">
+                {strategy.sections.map((section, sIndex) => (
+                    <div key={section.id} className="group relative pl-4 border-l-2 border-zinc-200 dark:border-zinc-800 hover:border-black dark:hover:border-white transition-colors">
+
+                        {/* Section Header */}
+                        <div className="flex items-center gap-4 mb-4">
+                            <Input
+                                value={section.title}
+                                onChange={e => updateSection(sIndex, { title: e.target.value })}
+                                className="font-bold text-lg bg-transparent border-none p-0 focus:ring-0 w-auto"
+                            />
+                            <button onClick={() => deleteSection(sIndex)} className="opacity-0 group-hover:opacity-100 transition-opacity text-zinc-400 hover:text-red-500">
+                                <Trash2 className="w-4 h-4" />
+                            </button>
+                        </div>
+
+                        {/* Items */}
+                        <div className="space-y-3">
+                            {section.items.map((item, iIndex) => (
+                                <div key={item.id} className="bg-zinc-100 dark:bg-zinc-900/50 p-4 rounded-xl border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700 transition-all">
+                                    <div className="flex justify-between items-start gap-4">
+                                        <div className="flex-1 space-y-3">
+                                            {/* Item Label & Points */}
+                                            <div className="flex gap-4">
+                                                <Input
+                                                    value={item.label}
+                                                    onChange={e => updateItem(sIndex, iIndex, { label: e.target.value })}
+                                                    className="bg-transparent border-none p-0 h-auto font-medium focus:ring-0 text-base"
+                                                    placeholder={item.type === 'radio' ? "Group Name..." : "Condition..."}
+                                                />
+                                                {item.type === 'checkbox' && (
+                                                    <Input
+                                                        type="number"
+                                                        value={item.points}
+                                                        onChange={e => updateItem(sIndex, iIndex, { points: parseInt(e.target.value) || 0 })}
+                                                        className="w-16 h-8 text-right font-mono text-sm bg-white dark:bg-black border border-zinc-200 dark:border-zinc-800 rounded px-2"
+                                                        placeholder="Pts"
+                                                    />
+                                                )}
+                                            </div>
+
+                                            {/* Radio Options */}
+                                            {item.type === 'radio' && item.options && (
+                                                <div className="pl-4 space-y-2 border-l border-zinc-300 dark:border-zinc-700">
+                                                    {item.options.map((opt, oIndex) => (
+                                                        <div key={oIndex} className="flex gap-2 items-center">
+                                                            <div className="w-3 h-3 rounded-full border-2 border-zinc-400"></div>
+                                                            <Input
+                                                                value={opt.label}
+                                                                onChange={e => updateOption(sIndex, iIndex, oIndex, { label: e.target.value })}
+                                                                className="bg-transparent border-none p-0 h-auto text-sm focus:ring-0 flex-1"
+                                                            />
+                                                            <Input
+                                                                type="number"
+                                                                value={opt.points}
+                                                                onChange={e => updateOption(sIndex, iIndex, oIndex, { points: parseInt(e.target.value) || 0 })}
+                                                                className="w-14 h-6 text-right font-mono text-xs bg-transparent border-b border-zinc-500 rounded-none px-0"
+                                                            />
+                                                            <button onClick={() => removeOption(sIndex, iIndex, oIndex)} className="text-zinc-500 hover:text-red-500">
+                                                                <Trash2 className="w-3 h-3" />
+                                                            </button>
+                                                        </div>
+                                                    ))}
+                                                    <Button size="sm" variant="ghost" onClick={() => addOption(sIndex, iIndex)} className="text-xs h-6 px-0 text-indigo-400 hover:text-indigo-300">
+                                                        + Add Option
+                                                    </Button>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <button onClick={() => deleteItem(sIndex, iIndex)} className="text-zinc-500 hover:text-red-500">
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+
+                            <div className="flex gap-3 pt-2">
+                                <Button onClick={() => addItem(sIndex, 'checkbox')} className="text-xs h-8 bg-zinc-200 text-black hover:bg-zinc-300 border-none dark:bg-white dark:text-black">
+                                    + Checkbox
+                                </Button>
+                                <Button onClick={() => addItem(sIndex, 'radio')} className="text-xs h-8 bg-zinc-800 text-white hover:bg-zinc-700 border-none">
+                                    + Radio Group
+                                </Button>
                             </div>
-                        ))}
+                        </div>
                     </div>
-                </CardContent>
-            </Card>
+                ))}
+
+                <Button variant="outline" className="w-full border-dashed border-zinc-300 dark:border-zinc-700 h-12 hover:bg-zinc-100 dark:hover:bg-zinc-900" onClick={addSection}>
+                    + Add New Section
+                </Button>
+            </div>
+
+            {/* Minimal Grade Config */}
+            <div className="border-t border-zinc-200 dark:border-zinc-800 pt-8">
+                <h3 className="font-bold mb-4">Grade Thresholds</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    {Object.entries(strategy.grade_thresholds).map(([grade, val]) => (
+                        <div key={grade} className="bg-zinc-100 dark:bg-zinc-900/50 p-4 rounded-xl text-center">
+                            <div className="text-xs text-zinc-500 font-bold mb-1">{grade}</div>
+                            <Input
+                                type="number"
+                                value={val}
+                                onChange={e => setStrategy({
+                                    ...strategy,
+                                    grade_thresholds: {
+                                        ...strategy.grade_thresholds,
+                                        [grade]: parseInt(e.target.value)
+                                    }
+                                })}
+                                className="text-center font-mono bg-transparent border-none text-xl p-0 focus:ring-0 w-full"
+                            />
+                        </div>
+                    ))}
+                </div>
+            </div>
         </div>
     );
 }
